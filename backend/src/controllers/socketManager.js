@@ -5,8 +5,8 @@ let connections = {}
 let messages = {}
 let timeOnline = {}
 
-export const connectToSocket = (server) => {
-    const io = new Server(server, {
+export const connectToSocket = (server) => {    //Socket Server Initialization:   function where we pass express server,  and socket.io is attach with it//
+    const io = new Server(server, { 
         cors: {
             origin: "*",
             methods: ["GET", "POST"],
@@ -20,34 +20,37 @@ export const connectToSocket = (server) => {
 
         console.log("SOMETHING CONNECTED")
 
-        socket.on("join-call", (path) => {
+        socket.on("join-call", (room) => {
 
-            if (connections[path] === undefined) {
-                connections[path] = []
+            if (connections[room] === undefined) {    
+                connections[room] = []  //Agar ye path pe pehle koi user nahi hai, to us path (room) ke liye ek empty list bana di.//
             }
-            connections[path].push(socket.id)
+            connections[room].push(socket.id)   //added the socket id of the current user //
 
             timeOnline[socket.id] = new Date();
             
-            for (let a = 0; a < connections[path].length; a++) {
-                io.to(connections[path][a]).emit("user-joined", socket.id, connections[path])
+            for (let a = 0; a < connections[room].length; a++) {
+                io.to(connections[room][a]).emit("user-joined", socket.id, connections[room])   //it will notify every user that new user is joined//
             }
 
-            if (messages[path] !== undefined) {
-                for (let a = 0; a < messages[path].length; ++a) {
-                    io.to(socket.id).emit("chat-message", messages[path][a]['data'],
-                        messages[path][a]['sender'], messages[path][a]['socket-id-sender'])
+                //if there is some chats in the room then new user will see all the chst here//
+            if (messages[room] !== undefined) {
+                for (let a = 0; a < messages[room].length; ++a) {
+                    io.to(socket.id).emit("chat-message", messages[room][a]['data'],
+                        messages[room][a]['sender'], messages[room][a]['socket-id-sender'])
                 }
             }
 
         })
 
+
+        // signalling is useded in webRTC to exchange signal . this is used in betwwen user to establish the connection.//
         socket.on("signal", (toId, message) => {
             io.to(toId).emit("signal", socket.id, message);
         })
 
-        socket.on("chat-message", (data, sender) => {
-
+        socket.on("chat-message", (data, sender) => {    //msg send by user//
+                // checking user is in which room based on the socket.id//
             const [matchingRoom, found] = Object.entries(connections)
                 .reduce(([room, isFound], [roomKey, roomValue]) => {
 
@@ -76,7 +79,7 @@ export const connectToSocket = (server) => {
         })
 
         socket.on("disconnect", () => {
-
+                //Kitni der tak user online tha, wo time calculate kiya.//
             var diffTime = Math.abs(timeOnline[socket.id] - new Date())
 
             var key
@@ -97,7 +100,7 @@ export const connectToSocket = (server) => {
 
 
                         if (connections[key].length === 0) {
-                            delete connections[key]
+                            delete connections[key]   //no user left then room deleted//
                         }
                     }
                 }
