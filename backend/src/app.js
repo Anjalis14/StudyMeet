@@ -22,12 +22,11 @@ app.use("/api/v1/users",userRoutes);
 //     res.send("Hello world");
 // });
 
-const start= async ()=>{
-app.set("URL")
-const connectionDb = await mongoose.connect(process.env.URL);
-console.log("database connected");
-server.listen(app.get("port"),()=>{
-    console.log("server is running on port 8000");
-});
-}
+const start= async ()=> {
+  const connectionDb = await mongoose.connect(process.env.URL);
+  console.log("database connected");
+  server.listen(app.get("port"), () => {
+    console.log("server is running on port", app.get("port"));
+  });
+};
 start();
