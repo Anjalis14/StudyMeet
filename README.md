@@ -4,6 +4,10 @@
 
 ---
 
+
+## 🚀 Live Demo
+👉 [StudyMeet Live](https://studymeetfrontend.onrender.com)  
+
 ## 🌟 Features
 
 - 🔐 Login via meeting code, guest access, or user account  
